@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS "Orders" (
 	"notes" TEXT NOT NULL,
 	PRIMARY KEY("id"),
 	FOREIGN KEY("nickname") REFERENCES "Customers"("id")
-	UNIQUE("ball", "type", "nickname") ON CONFLICT IGNORE
+	UNIQUE("ball", "type", "nickname", "status", "notes") ON CONFLICT IGNORE
 )""")
 # UNIQUE("ball", "type", "nickname") ON CONFLICT UPDATE ("ball", "type", "nickname")
 

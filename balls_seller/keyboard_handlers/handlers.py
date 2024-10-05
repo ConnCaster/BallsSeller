@@ -407,7 +407,7 @@ async def notes_registrar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         curr_amount = get_amount_of_common_balls(type, material, color, picture)
         nickname = update.effective_user.name
         note = update.message.text
-        complete_order(type, material, color, picture, amount, curr_amount, nickname, note)
+        complete_common_order(type, material, color, picture, amount, curr_amount, nickname, note)
 
     elif 'shape' in context.user_data.keys() and context.user_data['shape'] == 'shaped':
         if 'type' not in context.user_data.keys() \
@@ -423,8 +423,13 @@ async def notes_registrar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         nickname = update.effective_user.name
         note = update.message.text
         complete_shaped_order(type, subtype, picture_name, amount, curr_amount, nickname, note)
-    note = update.message.text
-    #TODO добавить адрес в БД
+    elif 'order_type' in context.user_data.keys() and context.user_data['order_type'] == 'own_balls':
+        if 'amount' not in context.user_data.keys():
+            return
+        amount = context.user_data['amount']
+        nickname = update.effective_user.name
+        note = update.message.text
+        complete_blowing_order(amount, nickname, note)
     await update.effective_message.reply_text(f"Ваш адрес успешно принят. Вы заказали доставку {context.user_data['amount']} шариков")
     context.user_data.clear()
 
@@ -475,7 +480,6 @@ async def order_registrar(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await update.effective_message.reply_text(
                     f"Нельзя делать заявки на 0 шариков. Введите новое количество шариков")
                 return
-
     context.user_data["amount"] = amount
     await update.effective_message.reply_text(f"Ваша заявка на {amount} шарик(-ов, -a) сформирована. Для завершения оформления заказа впишите адрес, на который требуется доставка.")
 

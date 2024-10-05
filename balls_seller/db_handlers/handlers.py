@@ -179,7 +179,7 @@ def get_amount_of_shaped_balls(type: str, subtype: str, picture_name: str):
 #     connection.commit()
 #     connection.close()
 
-def complete_order(type: str, material: str, color: str, picture: str,  amount: int, curr_amount: int, nickname: str, note: str):
+def complete_common_order(type: str, material: str, color: str, picture: str,  amount: int, curr_amount: int, nickname: str, note: str):
     connection = sqlite3.Connection(os.path.join('db', 'balls_seller.sqlite'))
     cursor = connection.cursor()
     if amount == curr_amount:
@@ -202,8 +202,19 @@ def complete_order(type: str, material: str, color: str, picture: str,  amount: 
                    f"AND Common_Balls.picture == '{picture}'"
                    f"AND Customers.nickname = '{nickname}'")
     id_ball, id_customer = cursor.fetchone()
-    cursor.execute(f"INSERT INTO Orders (ball, type, amount, nickname, notes)"
-                   f" VALUES ({id_ball}, \"common\", {amount}, {id_customer}, \"{note}\")")
+    cursor.execute(
+        f"SELECT amount FROM Orders where ball='{id_ball}' AND type='common' AND nickname='{id_customer}' AND notes='{note}' AND status='not paid'")
+    orders_before_amount = cursor.fetchone()
+    if orders_before_amount is None:
+        cursor.execute(f"INSERT INTO Orders (ball, type, amount, nickname, notes)"
+                       f" VALUES ({id_ball}, \"common\", {amount}, {id_customer}, \"{note}\")")
+    else:
+        cursor.execute(
+            f"UPDATE Orders SET amount={amount + orders_before_amount[0]} where "
+            f"ball='{id_ball}' "
+            f"AND type='common' "
+            f"AND nickname='{id_customer}' "
+            f"AND notes='{note}'")
     connection.commit()
     connection.close()
 
@@ -231,32 +242,39 @@ def complete_shaped_order(type: str, subtype: str, picture_name: str, amount: in
                    f"AND Customers.nickname = '{nickname}'")
     id_ball, id_customer = cursor.fetchone()
     cursor.execute(
-        f"SELECT amount FROM Orders where ball='{id_ball}' AND type='shaped' AND nickname='{id_customer}'")
-    orderes_before_amount = cursor.fetchone()
-    cursor.execute(
-        f"SELECT notes FROM Orders where ball='{id_ball}' AND type='shaped' AND nickname='{id_customer}'")
-    orderes_before_notes = cursor.fetchone()
-    if orderes_before_amount is None and orderes_before_notes is None:
+        f"SELECT amount FROM Orders where ball='{id_ball}' AND type='shaped' AND nickname='{id_customer}' AND notes='{note}' AND status='not paid'")
+    orders_before_amount = cursor.fetchone()
+    if orders_before_amount is None:
         cursor.execute(f"INSERT INTO Orders (ball, type, amount, nickname, notes)"
                        f" VALUES ({id_ball}, \"shaped\", {amount}, {id_customer}, \"{note}\")")
     else:
         cursor.execute(
-            f"UPDATE Orders SET amount={amount + orderes_before_amount[0]} where "
+            f"UPDATE Orders SET amount={amount + orders_before_amount[0]} where "
             f"ball='{id_ball}' "
             f"AND type='shaped' "
             f"AND nickname='{id_customer}' "
-            f"AND notes='{orderes_before_notes}'")
+            f"AND notes='{note}'")
     connection.commit()
     connection.close()
 
 
-def complete_blowing_order(amount: int, nickname: str):
+def complete_blowing_order(amount: int, nickname: str, note: str):
     connection = sqlite3.Connection(os.path.join('db', 'balls_seller.sqlite'))
     cursor = connection.cursor()
     cursor.execute(f"INSERT INTO Customers (nickname) VALUES ('{nickname}')")
     connection.commit()
     cursor.execute(f"SELECT id from Customers WHERE nickname = '{nickname}'")
     id_customer = cursor.fetchone()[0]
-    cursor.execute(f"INSERT INTO Orders (amount, nickname) VALUES ({amount}, {id_customer})")
+    cursor.execute(
+        f"SELECT amount FROM Orders where nickname='{id_customer}' AND type='Blow up' AND status='not paid' AND notes='{note}'")
+    orders_before_amount = cursor.fetchone()
+    if orders_before_amount is None:
+        cursor.execute(f"INSERT INTO Orders (amount, nickname, notes) VALUES ({amount}, {id_customer}, '{note}')")
+    else:
+        cursor.execute(
+            f"UPDATE Orders SET amount={amount + orders_before_amount[0]} where "
+            f"type='Blow up' "
+            f"AND nickname='{id_customer}' "
+            f"AND notes='{note}'")
     connection.commit()
     connection.close()
