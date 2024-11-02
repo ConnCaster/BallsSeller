@@ -173,15 +173,15 @@ keyboard_dict = {
     },
     "show_shaped_types": {
         "keyboard": get_avaliable_shaped_types(),
-        "text": "вот фигурные шарики"
+        "text": "Выберите одну из форм шарика:"
     },
     "show_shaped_subtypes": {
         "keyboard": get_avaliable_shaped_subtypes(),
-        "text": "Выберите материал для шарика"
+        "text": "Уточните вид шарика из предложенных подвидов выбранного ранее типа:"
     },
     "show_shaped_pictures": {
         "keyboard": get_avaliable_shaped_pictures(),
-        "text": "Выберите материал для шарика"
+        "text": "Выберите изображение шарика по картинке, нажав соответствующую кнопку:"
     },
 }
 
@@ -366,12 +366,18 @@ async def show_shaped_pictures(update, query, context: ContextTypes.DEFAULT_TYPE
         with open(trash_path, 'rb') as file:
             L.append(InputMediaPhoto(file))
             i += 1
-    await context.bot.send_media_group(chat_id, L)
+    ret = await context.bot.send_media_group(chat_id, L)
+    if 'pictures_message_id' not in context.user_data:
+        context.user_data['pictures_message_id'] = [(ret[0].message_id, i - 1)]  # i - 1 => количество картинок в сообщении
+    else:
+        context.user_data['pictures_message_id'].append((ret[0].message_id, i - 1))
     path_to_trash_dir = remove_last_segment_in_path(trash_path)
     trash_files_names = os.listdir(path_to_trash_dir)
     for file_name in trash_files_names:
         os.remove(os.path.join(path_to_trash_dir, file_name))
+    await context.bot.delete_message(chat_id=query.message.chat_id, message_id=ret[0].message_id - 1)
     await context.bot.send_message(chat_id, text, reply_markup=reply_markup)
+
 
 
 async def back(query, context):
@@ -382,15 +388,16 @@ async def back(query, context):
         keyboard_dict[keyboard_level]["keyboard"] = get_avalible_common_colors_and_amount(context.user_data['type'],
                                                                                           context.user_data['material'])[0]
     if keyboard_level == "show_shaped_subtypes":
+        counter_of_msgs = context.user_data['pictures_message_id'][-1][1]
+        first_msg_to_delete = context.user_data['pictures_message_id'][-1][0]
+        for prev_msg_id in range(first_msg_to_delete, first_msg_to_delete + counter_of_msgs):
+            await context.bot.delete_message(chat_id=query.message.chat_id, message_id=prev_msg_id)
         keyboard_dict[keyboard_level]["keyboard"] = get_avaliable_shaped_subtypes(context.user_data['type'])
 
     await query.edit_message_text(keyboard_dict[keyboard_level]['text'],
                                   reply_markup=InlineKeyboardMarkup(keyboard_dict[keyboard_level]['keyboard']))
 
 
-#TODO:
-# 1. заказы одного типа шариков на разные адреса
-# 2. суммирование заказов одного шарика на один адрес (common)
 async def notes_registrar(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if 'shape' in context.user_data.keys() and context.user_data['shape'] == 'common':
         if 'color' not in context.user_data.keys() \
@@ -482,72 +489,3 @@ async def order_registrar(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 return
     context.user_data["amount"] = amount
     await update.effective_message.reply_text(f"Ваша заявка на {amount} шарик(-ов, -a) сформирована. Для завершения оформления заказа впишите адрес, на который требуется доставка.")
-
-
-
-
-# async def order_registrar(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     amount = int(update.message.text)
-#     nickname = update.effective_user.name
-#     if 'shape' in context.user_data.keys() and context.user_data['shape'] == 'common':
-#         if 'color' not in context.user_data.keys() \
-#                 or 'material' not in context.user_data.keys() \
-#                 or 'type' not in context.user_data.keys() \
-#                 or 'picture_name' not in context.user_data.keys():
-#             return
-#         color = context.user_data['color']
-#         material = context.user_data['material']
-#         type = context.user_data['type']
-#         picture = context.user_data['picture_name']
-#         curr_amount = get_amount_of_common_balls(type, material, color, picture)
-#         if curr_amount < int(amount):
-#             await update.message.reply_text(f"Количество шариков в заказе превышает количество шариков в наличии. "
-#                                             f"Введите новое значение (в наличии шариков цвета {color} {curr_amount} шт.)")
-#             return
-#         else:
-#             if amount <= 0:
-#                 await update.effective_message.reply_text(f"Нельзя делать заявки на 0 шариков. Введите новое количество шариков")
-#                 return
-#             # complete_order(type, material, color, picture, amount, curr_amount, nickname)
-#             # update_common_colors_keyboard(type, material)
-#             await update.effective_message.reply_text(f"Ваша заявка на {amount} шарик(-ов, -а) принята",
-#                                                     reply_markup=InlineKeyboardMarkup(
-#                                                         keyboard_dict['start']['keyboard']))
-#
-#
-#     elif 'shape' in context.user_data.keys() and context.user_data['shape'] == 'shaped':
-#         if 'type' not in context.user_data.keys() \
-#                 or 'subtype' not in context.user_data.keys() \
-#                 or 'picture_name' not in context.user_data.keys():
-#             return
-#         type = context.user_data['type']
-#         subtype = context.user_data['subtype']
-#         picture_name = context.user_data['picture_name']
-#         curr_amount = get_amount_of_shaped_balls(type, subtype, picture_name)
-#         if curr_amount < int(amount):
-#             await update.message.reply_text(f"Количество шариков в заказе превышает количество шариков в наличии. "
-#                                             f"Введите новое значение (в наличии выбранных Вами шариков {curr_amount} шт.)")
-#             return
-#         else:
-#
-#             if amount <= 0:
-#                 await update.effective_message.reply_text(
-#                     f"Нельзя делать заявки на 0 шариков. Введите новое количество шариков")
-#                 return
-#             # complete_shaped_order(type, subtype, picture_name, amount, curr_amount, nickname)
-#             await update.effective_message.reply_text(f"Ваша заявка на {amount} шарик(-ов, -а) принята",
-#                                                       reply_markup=InlineKeyboardMarkup(
-#                                                           keyboard_dict['start']['keyboard']))
-#
-#
-#     elif 'order_type' in context.user_data.keys() and context.user_data['order_type'] == 'own_balls':
-#
-#         if amount <= 0:
-#             await update.effective_message.reply_text(
-#                 f"Нельзя делать заявки на 0 шариков. Введите новое количество шариков")
-#             return
-#         # complete_blowing_order(amount, nickname)
-#         await update.effective_message.reply_text(f"Ваша заявка на {amount} шарик(-ов, -a) принята",
-#                                                   reply_markup=InlineKeyboardMarkup(
-#                                                       keyboard_dict['start']['keyboard']))
-#     # context.user_data.clear()
