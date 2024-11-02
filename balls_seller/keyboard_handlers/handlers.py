@@ -437,7 +437,8 @@ async def notes_registrar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         nickname = update.effective_user.name
         note = update.message.text
         complete_blowing_order(amount, nickname, note)
-    await update.effective_message.reply_text(f"Ваш адрес успешно принят. Вы заказали доставку {context.user_data['amount']} шариков")
+    await update.effective_message.reply_text(f"Ваш адрес успешно принят. Вы заказали доставку {context.user_data['amount']} шариков",
+                                              reply_markup=InlineKeyboardMarkup(keyboard_dict['start']['keyboard']))
     context.user_data.clear()
 
 
