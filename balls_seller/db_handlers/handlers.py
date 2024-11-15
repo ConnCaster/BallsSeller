@@ -44,7 +44,7 @@ def get_ordered_common_balls_from_DB(nickname: int):
 def get_own_shaped_balls_from_DB(nickname: int):
     connection = sqlite3.Connection(os.path.join('db', 'balls_seller.sqlite'))
     cursor = connection.cursor()
-    cursor.execute(f"SELECT Orders.amount FROM Orders WHERE Orders.nickname=={nickname} and Orders.type=='Blow up'")
+    cursor.execute(f"SELECT Orders.amount, Orders.notes FROM Orders WHERE Orders.nickname=={nickname} and Orders.type=='Blow up'")
     ordered_common_balls = cursor.fetchall()
     connection.close()
     return ordered_common_balls

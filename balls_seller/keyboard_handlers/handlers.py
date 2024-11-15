@@ -217,7 +217,8 @@ def gen_cart_msg(common_orders=None, shaped_orders=None, own_orders=None):
                            f"итоговая стоимость - {shaped_orders[i][4] * shaped_orders[i][3]} ₽ \n{tabs}Доп. информация: {common_orders[i][6]}\n")
 
     if own_orders:
-        all_orders += f"\n\t\tСвоих шариков заказано: {own_orders[0][0]} шт."
+        for i in range(len(own_orders)):
+            all_orders += f"\n\t\tСвоих шариков заказано: {own_orders[i][0]} шт. \n{tabs}Доп. информация: {own_orders[i][1]}"
 
     return str(all_orders)
 
