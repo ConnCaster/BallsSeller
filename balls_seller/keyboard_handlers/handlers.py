@@ -206,14 +206,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def gen_cart_msg(common_orders=None, shaped_orders=None, own_orders=None):
     all_orders = ""
+    tabs = "\t"*11
     if common_orders:
         for i in range(len(common_orders)):
             all_orders += (f"\t\t\[{i+1}] -- заказано {common_orders[i][4]} шт., "
-                           f"итоговая стоимость - {common_orders[i][5] * common_orders[i][4]} ₽\n")
+                           f"итоговая стоимость - {common_orders[i][5] * common_orders[i][4]} ₽ \n{tabs}Доп. информация: {common_orders[i][6]}\n")
     if shaped_orders:
         for i in range(len(shaped_orders)):
             all_orders += (f"\t\t\[{i + len(common_orders) + 1}] -- заказано {shaped_orders[i][3]} шт., "
-                           f"итоговая стоимость - {shaped_orders[i][4] * shaped_orders[i][3]} ₽\n")
+                           f"итоговая стоимость - {shaped_orders[i][4] * shaped_orders[i][3]} ₽ \n{tabs}Доп. информация: {common_orders[i][6]}\n")
 
     if own_orders:
         all_orders += f"\n\t\tСвоих шариков заказано: {own_orders[0][0]} шт."
