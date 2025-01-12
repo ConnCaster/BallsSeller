@@ -26,6 +26,17 @@ cursor.execute("""INSERT INTO Common_Balls (type, color, picture, amount, price)
 cursor.execute("""INSERT INTO Common_Balls (type, color, picture, amount, price) VALUES ('Hello, Kitty', 'black', 'hello_kitty_black.jpg', 3, 65)""")
 cursor.execute("""INSERT INTO Common_Balls (type, material, color, picture, amount, price) VALUES ('Hello, Kitty', 'latex', 'black', 'hello_kitty_black.jpg', 3, 65)""")
 
+
+cursor.execute("""DROP TABLE BlowUp_Balls""")
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS "BlowUp_Balls" (
+	"id" INTEGER NOT NULL UNIQUE,
+	"price"	INTEGER NOT NULL DEFAULT 0,
+	PRIMARY KEY("id")
+)""")
+cursor.execute("""INSERT INTO BlowUp_Balls (price) VALUES (80)""")
+
+
 cursor.execute("""DROP TABLE Shaped_Balls""")
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS "Shaped_Balls" (
@@ -78,7 +89,6 @@ CREATE TABLE IF NOT EXISTS "Orders" (
 	FOREIGN KEY("nickname") REFERENCES "Customers"("id")
 	UNIQUE("ball", "type", "nickname", "status", "notes") ON CONFLICT IGNORE
 )""")
-# UNIQUE("ball", "type", "nickname") ON CONFLICT UPDATE ("ball", "type", "nickname")
 
 
 

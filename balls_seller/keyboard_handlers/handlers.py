@@ -218,7 +218,8 @@ def gen_cart_msg(common_orders=None, shaped_orders=None, own_orders=None):
 
     if own_orders:
         for i in range(len(own_orders)):
-            all_orders += f"\n\t\tСвоих шариков заказано: {own_orders[i][0]} шт. \n{tabs}Доп. информация: {own_orders[i][1]}"
+            all_orders += (f"\n\t\tСвоих шариков заказано: {own_orders[i][0]} шт., "
+                           f"итоговая стоимость - {own_orders[i][0] * own_orders[i][2]} ₽  \n{tabs}Доп. информация: {own_orders[i][1]}")
 
     return str(all_orders)
 
@@ -244,6 +245,7 @@ async def cart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         i = 1
         list_of_media = []
         media_per_msg = []
+        trash_path = ""
         for path in pictures_paths:
             trash_path = add_sign_to_picture_and_save_to_trash(path, "[" + str(i) + "]")
             with open(trash_path, 'rb') as file:
@@ -253,17 +255,19 @@ async def cart(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 list_of_media.append(media_per_msg)
                 media_per_msg = []
         if i % 10 != 0:
-            list_of_media.append(media_per_msg)
+            if media_per_msg:
+                list_of_media.append(media_per_msg)
             media_per_msg = []
 
         for msg in list_of_media:
             await context.bot.send_media_group(chat_id, msg)
-        path_to_trash_dir = remove_last_segment_in_path(trash_path)
-        trash_files_names = os.listdir(path_to_trash_dir)
-        for file_name in trash_files_names:
-            os.remove(os.path.join(path_to_trash_dir, file_name))
+        if trash_path:
+            path_to_trash_dir = remove_last_segment_in_path(trash_path)
+            trash_files_names = os.listdir(path_to_trash_dir)
+            for file_name in trash_files_names:
+                os.remove(os.path.join(path_to_trash_dir, file_name))
 
-        ordered_own_balls_info = get_own_shaped_balls_from_DB(dict_of_nicks[nickname])
+        ordered_own_balls_info = get_ordered_blowup_balls_from_DB(dict_of_nicks[nickname])
         text = gen_cart_msg(ordered_common_balls_info, ordered_shaped_balls_info, ordered_own_balls_info)
 
     await update.message.reply_text('''\U0001F388 Ваша корзина:\n\n_Если в сообщении выше не видно номеров на картинках, откройте их, пожалуйста, по одной и убедитесь в правильности бронирования_\n\n'''
