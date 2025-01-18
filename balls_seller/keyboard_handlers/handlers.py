@@ -311,6 +311,8 @@ async def show_common_colors_and_amount(query, context: ContextTypes.DEFAULT_TYP
 
 
 async def show_common_pictures(update, query, context: ContextTypes.DEFAULT_TYPE):
+    #TODO проверить почему не работает дебаг мод
+    #TODO добавить кол-во шариков в наличии в текст сообщения
     keyboard, pictures_paths = get_avaliable_common_pictures(context.user_data['type'], context.user_data['material'],
                                                              query.data.strip())
     text = "Выберите изображение шарика по картинке, нажав соответствующую кнопку:"
