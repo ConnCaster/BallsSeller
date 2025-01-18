@@ -206,21 +206,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def gen_cart_msg(common_orders=None, shaped_orders=None, own_orders=None):
     all_orders = ""
-    tabs = "\t"*11
+    tabs = "\t"*10
     if common_orders:
-        pass
-        # for i in range(len(common_orders)):
-            # all_orders += (f"\t\t\[{i+1}] -- заказано {common_orders[i][4]} шт., "
-            #                f"итоговая стоимость - {common_orders[i][5] * common_orders[i][4]} ₽ \n{tabs}Доп. информация: {common_orders[i][6]}\n")
+        for i in range(len(common_orders)):
+            all_orders += (f"\t\t\[{i+1}] -- заказано {common_orders[i][4]} шт., "
+                           f"итоговая стоимость - {common_orders[i][5] * common_orders[i][4]} ₽ \n{tabs}Доп. информация: {escape_markdown(common_orders[i][6])}\n")
     if shaped_orders:
         for i in range(len(shaped_orders)):
             all_orders += (f"\t\t\[{i + len(common_orders) + 1}] -- заказано {shaped_orders[i][3]} шт., "
-                           f"итоговая стоимость - {shaped_orders[i][4] * shaped_orders[i][3]} ₽ \n{tabs}Доп. информация: {common_orders[i][6]}\n")
+                           f"итоговая стоимость - {shaped_orders[i][4] * shaped_orders[i][3]} ₽ \n{tabs}Доп. информация: {escape_markdown(shaped_orders[i][5])}\n")
 
     if own_orders:
         for i in range(len(own_orders)):
             all_orders += (f"\n\t\tСвоих шариков заказано: {own_orders[i][0]} шт., "
-                           f"итоговая стоимость - {own_orders[i][0] * own_orders[i][2]} ₽  \n{tabs}Доп. информация: {own_orders[i][1]}")
+                           f"итоговая стоимость - {own_orders[i][0] * own_orders[i][2]} ₽  \n{tabs}Доп. информация: {escape_markdown(own_orders[i][1])}")
 
     return str(all_orders)
 
@@ -270,9 +269,8 @@ async def cart(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         ordered_own_balls_info = get_ordered_blowup_balls_from_DB(dict_of_nicks[nickname])
         text = gen_cart_msg(ordered_common_balls_info, ordered_shaped_balls_info, ordered_own_balls_info)
-
-    await update.message.reply_text('''\U0001F388 Ваша корзина:\n\n_Если в сообщении выше не видно номеров на картинках, откройте их, пожалуйста, по одной и убедитесь в правильности бронирования_\n\n'''
-                                    + text, parse_mode="Markdown")
+    await update.message.reply_text('''\U0001F388 Ваша корзина:\n\n_Если в сообщении выше не видно номеров на картинках, откройте их, пожалуйста, по одной и убедитесь в правильности бронирования_\n\n''' +
+                                    text, parse_mode="Markdown")
 
 
 

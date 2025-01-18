@@ -41,5 +41,18 @@ def remove_last_segment_in_path(path: str):
     return path[:path.rfind(os.sep)]
 
 
+def escape_markdown(text):
+    # Список специальных символов Markdown, которые нужно экранировать
+    special_chars = ['\\', '*', '_', '{', '}', '[', ']', '(', ')', '>', '#', '+', '-', '.', '!', '~', '`']
+
+    # Экранируем каждый специальный символ
+    for char in special_chars:
+        text = text.replace(char, f'\\{char}')
+
+    return text
+
+
+
+
 if __name__ == "__main__":
     path = remove_last_segment_in_path('/home/user/dir/programming/python/Gleb/balls_seller/pictures/trash/cat4.png')
