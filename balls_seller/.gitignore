@@ -2,4 +2,4 @@ db_handlers/__pycache__
 keyboard_handlers/__pycache__
 third_party/__pycache__
 __pycache__
-balls_seller/db/balls_seller.sqlite
+db/balls_seller.sqlite
