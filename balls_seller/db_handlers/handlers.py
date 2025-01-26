@@ -124,16 +124,18 @@ def get_common_pictures_from_DB(common_ball_type=None, common_ball_material=None
         return [], []
     else:
         # TODO: сделать в таблице отдельные строки для каждой картинки
-        cursor.execute(f"SELECT picture FROM Common_Balls "
-                       f"where type == '{common_ball_type}' "
-                       f"and material == '{common_ball_material}'"
-                       f"and color == '{common_ball_color}'ORDER BY picture ASC")
-        pictures_paths = [tuple_element[0] for tuple_element in cursor.fetchall()]
-        pictures_names = pictures_paths.copy()
-        for i in range(len(pictures_paths)):
-            pictures_paths[i] = gen_picture_path(pictures_paths[i], balloon_type="common")
+        cursor.execute(f"SELECT picture, amount FROM Common_Balls "
+                       f"WHERE type == '{common_ball_type}' "
+                       f"AND material == '{common_ball_material}'"
+                       f"AND color == '{common_ball_color}' "
+                       f"AND amount != 0 "
+                       f"ORDER BY picture ASC")
+        pictures_names_and_amounts = list(map(list, cursor.fetchall()))
+        pictures_names = [tuple_element[0] for tuple_element in pictures_names_and_amounts]
+        for i in range(len(pictures_names)):
+            pictures_names_and_amounts[i][0] = gen_picture_path(pictures_names_and_amounts[i][0], balloon_type="common")
         connection.close()
-        return pictures_paths, pictures_names
+        return pictures_names_and_amounts, pictures_names
 
 
 def get_common_materials_from_DB(common_ball_type=None):

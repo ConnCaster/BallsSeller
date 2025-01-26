@@ -12,15 +12,24 @@ from third_party.ops import *
 
 
 def get_avaliable_common_pictures(common_ball_type=None, common_ball_material=None, common_ball_color=None):
-    pictures_paths, pictures_names = get_common_pictures_from_DB(common_ball_type, common_ball_material,
+    pictures_paths_and_amount, pictures_names = get_common_pictures_from_DB(common_ball_type, common_ball_material,
                                                                  common_ball_color)
+    # TODO:
+    # 1. Если есть шарики разных видов конкретного цвета:
+    #       - показываем картинки
+    #       - показываем кнопки клавиатуры
+    #       - на каждой кнопке указываем остаток товара конкретного "цвета"  (1:Х шт)
+    # 2. Если нет шариков данного цвета:
+    #       - мы не дойдем до этой функции, поэтому не делаем ничего
+
     keyboard = []
     kbrd_line = []
     kbrd_line_length = 2
     picture_counter = 1
-    for i in range(len(pictures_paths)):
+    # pictures_paths - список пар (путь к картинке; количество)
+    for i in range(len(pictures_paths_and_amount)):
         kbrd_line.append(InlineKeyboardButton(
-            f"{common_ball_color} {picture_counter}",
+            f"{picture_counter}: {pictures_paths_and_amount[i][1]} шт.",
             callback_data="[" + common_ball_type + "]=[" + common_ball_material + "]=[" + common_ball_color + "]=[" +
                           pictures_names[i] + "]"))
         picture_counter += 1
@@ -30,6 +39,7 @@ def get_avaliable_common_pictures(common_ball_type=None, common_ball_material=No
     if len(kbrd_line) != 0:
         keyboard.append(kbrd_line)
     keyboard.append([InlineKeyboardButton("Назад", callback_data="back|show_common_colors")])
+    pictures_paths = [pair[0] for pair in pictures_paths_and_amount]
     return keyboard, pictures_paths
 
 
@@ -159,6 +169,8 @@ keyboard_dict = {
         ],
         "text": "Тут вы можете надуть свои шарики нашим гелием\n Введите количестов шариков ниже:"
     },
+
+    # COMMON BALLS KEYBOARDS
     "show_common_types": {
         "keyboard": get_avalible_common_types(),
         "text": "Выберите вариант надписи на шарике"
@@ -171,6 +183,8 @@ keyboard_dict = {
         "keyboard": get_avalible_common_colors_and_amount(),
         "text": "Выберите цвет с учетом остатка товаров"
     },
+
+    # SHAPED BALLS KEYBOARDS
     "show_shaped_types": {
         "keyboard": get_avaliable_shaped_types(),
         "text": "Выберите одну из форм шарика:"
@@ -310,7 +324,6 @@ async def show_common_colors_and_amount(query, context: ContextTypes.DEFAULT_TYP
 
 
 async def show_common_pictures(update, query, context: ContextTypes.DEFAULT_TYPE):
-    #TODO проверить почему не работает дебаг мод
     #TODO добавить кол-во шариков в наличии в текст сообщения
     keyboard, pictures_paths = get_avaliable_common_pictures(context.user_data['type'], context.user_data['material'],
                                                              query.data.strip())
@@ -327,6 +340,7 @@ async def show_common_pictures(update, query, context: ContextTypes.DEFAULT_TYPE
             L.append(InputMediaPhoto(file))
             i += 1
     await context.bot.send_media_group(chat_id, L)
+
     path_to_trash_dir = remove_last_segment_in_path(trash_path)
     trash_files_names = os.listdir(path_to_trash_dir)
     for file_name in trash_files_names:
