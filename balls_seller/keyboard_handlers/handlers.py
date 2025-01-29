@@ -123,14 +123,14 @@ def get_avaliable_shaped_subtypes(shaped_ball_type=None):
 
 
 def get_avaliable_shaped_pictures(shaped_ball_type=None, shaped_ball_subtype=None):
-    pictures_paths, pictures_names = get_shaped_pictures_from_DB(shaped_ball_type, shaped_ball_subtype)
+    pictures_paths_and_amount, pictures_names = get_shaped_pictures_from_DB(shaped_ball_type, shaped_ball_subtype)
     keyboard = []
     kbrd_line = []
     kbrd_line_length = 2
     picture_counter = 1
-    for i in range(len(pictures_paths)):
+    for i in range(len(pictures_paths_and_amount)):
         kbrd_line.append(InlineKeyboardButton(
-            f"{shaped_ball_subtype} {picture_counter}",
+            f"[{picture_counter}]: {pictures_paths_and_amount[i][1]} шт.",
             callback_data="[" + shaped_ball_type + "]=[" + shaped_ball_subtype + "]=[" + pictures_names[i] + "]"))
         # callback_data=pictures_paths[i]))  # TODO: Пути к картинкам делают клавиатуру невалидной
         picture_counter += 1
@@ -140,6 +140,7 @@ def get_avaliable_shaped_pictures(shaped_ball_type=None, shaped_ball_subtype=Non
     if len(kbrd_line) != 0:
         keyboard.append(kbrd_line)
     keyboard.append([InlineKeyboardButton("Назад", callback_data="back|show_shaped_subtypes")])
+    pictures_paths = [pair[0] for pair in pictures_paths_and_amount]
     return keyboard, pictures_paths
 
 

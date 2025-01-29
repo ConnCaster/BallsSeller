@@ -110,17 +110,17 @@ def get_shaped_pictures_from_DB(shaped_ball_type=None, shaped_ball_subtype=None)
         return [], []
     else:
         # TODO: сделать в таблице отдельные строки для каждой картинки
-        cursor.execute(f"SELECT picture FROM Shaped_Balls "
+        cursor.execute(f"SELECT picture, amount FROM Shaped_Balls "
                        f"where type == '{shaped_ball_type}' "
                        f"AND subtype == '{shaped_ball_subtype}' "
                        f"AND amount != 0 "
                        f"ORDER BY picture ASC")
-        pictures_paths = [tuple_element[0] for tuple_element in cursor.fetchall()]
-        pictures_names = pictures_paths.copy()
-        for i in range(len(pictures_paths)):
-            pictures_paths[i] = gen_picture_path(pictures_paths[i], balloon_type="shaped")
+        pictures_names_and_amounts = list(map(list, cursor.fetchall()))
+        pictures_names = [tuple_element[0] for tuple_element in pictures_names_and_amounts]
+        for i in range(len(pictures_names)):
+            pictures_names_and_amounts[i][0] = gen_picture_path(pictures_names_and_amounts[i][0], balloon_type="shaped")
         connection.close()
-        return pictures_paths, pictures_names
+        return pictures_names_and_amounts, pictures_names
 
 
 def get_common_pictures_from_DB(common_ball_type=None, common_ball_material=None, common_ball_color=None):
