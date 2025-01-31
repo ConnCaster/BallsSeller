@@ -72,7 +72,8 @@ def get_common_color_price_amount_DB(common_ball_type=None, common_ball_material
 def get_common_types_from_DB():
     connection = sqlite3.Connection(os.path.join('db', 'balls_seller.sqlite'))
     cursor = connection.cursor()
-    cursor.execute("SELECT DISTINCT type FROM Common_Balls ORDER BY color ASC")
+    cursor.execute("SELECT DISTINCT type FROM Common_Balls "
+                   "WHERE amount != 0 ")
     common_types = [tuple_element[0] for tuple_element in cursor.fetchall()]
     connection.close()
     return common_types
@@ -81,7 +82,8 @@ def get_common_types_from_DB():
 def get_shaped_types_from_DB():
     connection = sqlite3.Connection(os.path.join('db', 'balls_seller.sqlite'))
     cursor = connection.cursor()
-    cursor.execute("SELECT DISTINCT type FROM Shaped_Balls")
+    cursor.execute("SELECT DISTINCT type FROM Shaped_Balls "
+                   "WHERE amount != 0 ")
     common_types = [tuple_element[0] for tuple_element in cursor.fetchall()]
     connection.close()
     return common_types
@@ -94,7 +96,8 @@ def get_shaped_subtypes_from_DB(shaped_ball_type=None):
         return []
     else:
         cursor.execute(f"SELECT DISTINCT subtype FROM Shaped_Balls "
-                       f"where type == '{shaped_ball_type}'")
+                       f"where type == '{shaped_ball_type}' "
+                       f"AND amount != 0 ")
         shaped_ball_subtypes = [tuple_element[0] for tuple_element in cursor.fetchall()]
         connection.close()
         return shaped_ball_subtypes
@@ -107,14 +110,17 @@ def get_shaped_pictures_from_DB(shaped_ball_type=None, shaped_ball_subtype=None)
         return [], []
     else:
         # TODO: сделать в таблице отдельные строки для каждой картинки
-        cursor.execute(f"SELECT picture FROM Shaped_Balls "
-                       f"where type == '{shaped_ball_type}' and subtype == '{shaped_ball_subtype}' ORDER BY picture ASC")
-        pictures_paths = [tuple_element[0] for tuple_element in cursor.fetchall()]
-        pictures_names = pictures_paths.copy()
-        for i in range(len(pictures_paths)):
-            pictures_paths[i] = gen_picture_path(pictures_paths[i], balloon_type="shaped")
+        cursor.execute(f"SELECT picture, amount FROM Shaped_Balls "
+                       f"where type == '{shaped_ball_type}' "
+                       f"AND subtype == '{shaped_ball_subtype}' "
+                       f"AND amount != 0 "
+                       f"ORDER BY picture ASC")
+        pictures_names_and_amounts = list(map(list, cursor.fetchall()))
+        pictures_names = [tuple_element[0] for tuple_element in pictures_names_and_amounts]
+        for i in range(len(pictures_names)):
+            pictures_names_and_amounts[i][0] = gen_picture_path(pictures_names_and_amounts[i][0], balloon_type="shaped")
         connection.close()
-        return pictures_paths, pictures_names
+        return pictures_names_and_amounts, pictures_names
 
 
 def get_common_pictures_from_DB(common_ball_type=None, common_ball_material=None, common_ball_color=None):
@@ -145,7 +151,9 @@ def get_common_materials_from_DB(common_ball_type=None):
         return []
     else:
         cursor.execute(f"SELECT DISTINCT material FROM Common_Balls "
-                       f"where type == '{common_ball_type}' ORDER BY material ASC")
+                       f"where type == '{common_ball_type}' "
+                       f"AND amount != 0 "
+                       f"ORDER BY material ASC")
         common_types = [tuple_element[0] for tuple_element in cursor.fetchall()]
         connection.close()
         return common_types

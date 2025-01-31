@@ -29,7 +29,7 @@ def get_avaliable_common_pictures(common_ball_type=None, common_ball_material=No
     # pictures_paths - список пар (путь к картинке; количество)
     for i in range(len(pictures_paths_and_amount)):
         kbrd_line.append(InlineKeyboardButton(
-            f"{picture_counter}: {pictures_paths_and_amount[i][1]} шт.",
+            f"[{picture_counter}]: {pictures_paths_and_amount[i][1]} шт.",
             callback_data="[" + common_ball_type + "]=[" + common_ball_material + "]=[" + common_ball_color + "]=[" +
                           pictures_names[i] + "]"))
         picture_counter += 1
@@ -123,14 +123,14 @@ def get_avaliable_shaped_subtypes(shaped_ball_type=None):
 
 
 def get_avaliable_shaped_pictures(shaped_ball_type=None, shaped_ball_subtype=None):
-    pictures_paths, pictures_names = get_shaped_pictures_from_DB(shaped_ball_type, shaped_ball_subtype)
+    pictures_paths_and_amount, pictures_names = get_shaped_pictures_from_DB(shaped_ball_type, shaped_ball_subtype)
     keyboard = []
     kbrd_line = []
     kbrd_line_length = 2
     picture_counter = 1
-    for i in range(len(pictures_paths)):
+    for i in range(len(pictures_paths_and_amount)):
         kbrd_line.append(InlineKeyboardButton(
-            f"{shaped_ball_subtype} {picture_counter}",
+            f"[{picture_counter}]: {pictures_paths_and_amount[i][1]} шт.",
             callback_data="[" + shaped_ball_type + "]=[" + shaped_ball_subtype + "]=[" + pictures_names[i] + "]"))
         # callback_data=pictures_paths[i]))  # TODO: Пути к картинкам делают клавиатуру невалидной
         picture_counter += 1
@@ -140,6 +140,7 @@ def get_avaliable_shaped_pictures(shaped_ball_type=None, shaped_ball_subtype=Non
     if len(kbrd_line) != 0:
         keyboard.append(kbrd_line)
     keyboard.append([InlineKeyboardButton("Назад", callback_data="back|show_shaped_subtypes")])
+    pictures_paths = [pair[0] for pair in pictures_paths_and_amount]
     return keyboard, pictures_paths
 
 
@@ -173,29 +174,29 @@ keyboard_dict = {
     # COMMON BALLS KEYBOARDS
     "show_common_types": {
         "keyboard": get_avalible_common_types(),
-        "text": "Выберите вариант надписи на шарике"
+        "text": "Выберите принт на шарике в наличии" #Выберите вариант надписи на шарике
     },
     "show_common_materials": {
         "keyboard": get_avalible_common_materials(),
-        "text": "Выберите материал для шарика"
+        "text": "Выберите материал шарика"
     },
     "show_common_colors": {
         "keyboard": get_avalible_common_colors_and_amount(),
-        "text": "Выберите цвет с учетом остатка товаров"
+        "text": "Выберите цвет шарика" #Выберите цвет с учетом остатка товаров
     },
 
     # SHAPED BALLS KEYBOARDS
     "show_shaped_types": {
         "keyboard": get_avaliable_shaped_types(),
-        "text": "Выберите одну из форм шарика:"
+        "text": "Выберите одну из форм шарика в наличии"
     },
     "show_shaped_subtypes": {
         "keyboard": get_avaliable_shaped_subtypes(),
-        "text": "Уточните вид шарика из предложенных подвидов выбранного ранее типа:"
+        "text": "Уточните вид шарика " #из предложенных подвидов выбранного ранее типа:
     },
     "show_shaped_pictures": {
         "keyboard": get_avaliable_shaped_pictures(),
-        "text": "Выберите изображение шарика по картинке, нажав соответствующую кнопку:"
+        "text": "Выберите изображение шарика по картинке, нажав соответствующую кнопку"
     },
 }
 
@@ -301,7 +302,7 @@ async def show_our_balls(query):
 
 async def show_common_types(query, context: ContextTypes.DEFAULT_TYPE):
     keyboard = get_avalible_common_types()
-    text = "Выберите вариант надписи на шарике"
+    text = "Выберите принт на шарике в наличии"
     reply_markup = InlineKeyboardMarkup(keyboard)
     context.user_data['shape'] = 'common'
     await query.edit_message_text(text, reply_markup=reply_markup)
@@ -317,14 +318,13 @@ async def show_common_materials(query, context: ContextTypes.DEFAULT_TYPE):
 
 async def show_common_colors_and_amount(query, context: ContextTypes.DEFAULT_TYPE):
     keyboard, price = get_avalible_common_colors_and_amount(context.user_data['type'], query.data.strip())
-    text = "Выберите цвет с учетом остатка товаров. Цена: " + str(price) + " руб."
+    text = "Выберите цвет шарика. Цена: " + str(price) + " руб."
     reply_markup = InlineKeyboardMarkup(keyboard)
     context.user_data['material'] = query.data.strip()
     await query.edit_message_text(text, reply_markup=reply_markup)
 
 
 async def show_common_pictures(update, query, context: ContextTypes.DEFAULT_TYPE):
-    #TODO добавить кол-во шариков в наличии в текст сообщения
     keyboard, pictures_paths = get_avaliable_common_pictures(context.user_data['type'], context.user_data['material'],
                                                              query.data.strip())
     text = "Выберите изображение шарика по картинке, нажав соответствующую кнопку:"
@@ -360,7 +360,7 @@ async def ask_shaped_ball_amount(query, picture_name, context: ContextTypes.DEFA
 
 async def show_shaped_types(query, context: ContextTypes.DEFAULT_TYPE):
     keyboard = get_avaliable_shaped_types()
-    text = "Выберите одну из форм шарика"
+    text = "Выберите одну из форм шарика в наличии"
     reply_markup = InlineKeyboardMarkup(keyboard)
     context.user_data['shape'] = 'shaped'
     await query.edit_message_text(text, reply_markup=reply_markup)
@@ -368,7 +368,7 @@ async def show_shaped_types(query, context: ContextTypes.DEFAULT_TYPE):
 
 async def show_shaped_subtypes(query, context: ContextTypes.DEFAULT_TYPE):
     keyboard = get_avaliable_shaped_subtypes(query.data.strip())
-    text = "Уточните вид шарика из предложенных подвидов выбранного ранее типа:"
+    text = "Уточните вид шарика "
     reply_markup = InlineKeyboardMarkup(keyboard)
     context.user_data['type'] = query.data.strip()
     await query.edit_message_text(text, reply_markup=reply_markup)
@@ -376,7 +376,7 @@ async def show_shaped_subtypes(query, context: ContextTypes.DEFAULT_TYPE):
 
 async def show_shaped_pictures(update, query, context: ContextTypes.DEFAULT_TYPE):
     keyboard, pictures_paths = get_avaliable_shaped_pictures(context.user_data['type'], query.data.strip())
-    text = "Выберите изображение шарика по картинке, нажав соответствующую кнопку:"
+    text = "Выберите изображение шарика по картинке, нажав соответствующую кнопку"
     reply_markup = InlineKeyboardMarkup(keyboard)
     context.user_data['subtype'] = query.data.strip()
     chat_id = update.effective_chat.id
