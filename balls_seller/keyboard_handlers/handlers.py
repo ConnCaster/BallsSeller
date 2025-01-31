@@ -213,6 +213,7 @@ def update_common_colors_keyboard(type: str, material: str):
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data.clear()
     keyboard_level = "start"
     await update.message.reply_text(
         keyboard_dict[keyboard_level]['text'],
@@ -240,6 +241,7 @@ def gen_cart_msg(common_orders=None, shaped_orders=None, own_orders=None):
 
 
 async def cart(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data.clear()
     nickname = update.effective_user.name
     dict_of_nicks = dict(get_id_and_nicknames_from_DB())
     if nickname not in dict_of_nicks.keys():
@@ -290,6 +292,7 @@ async def cart(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def orders(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data.clear()
     text = "100500 ₽"  # TODO: handle in BD
     await update.message.reply_text(text)
 
@@ -458,7 +461,8 @@ async def notes_registrar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         nickname = update.effective_user.name
         note = update.message.text
         complete_blowing_order(amount, nickname, note)
-    await update.effective_message.reply_text(f"Ваш адрес успешно принят. Вы заказали доставку {context.user_data['amount']} шариков",
+    if context.user_data:
+        await update.effective_message.reply_text(f"Ваш адрес успешно принят. Вы заказали доставку {context.user_data['amount']} шариков",
                                               reply_markup=InlineKeyboardMarkup(keyboard_dict['start']['keyboard']))
     context.user_data.clear()
 
