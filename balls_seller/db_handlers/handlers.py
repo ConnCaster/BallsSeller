@@ -189,7 +189,7 @@ def get_amount_of_shaped_balls(type: str, subtype: str, picture_name: str):
 #     connection.commit()
 #     connection.close()
 
-def complete_common_order(type: str, material: str, color: str, picture: str,  amount: int, curr_amount: int, nickname: str, note: str):
+def complete_common_order(type: str, material: str, color: str, picture: str,  amount: int, curr_amount: int, nickname: str, note: str, user_id: int):
     connection = sqlite3.Connection(os.path.join('db', 'balls_seller.sqlite'))
     cursor = connection.cursor()
     if amount == curr_amount:
@@ -203,7 +203,7 @@ def complete_common_order(type: str, material: str, color: str, picture: str,  a
                        f"AND color == '{color}'"
                        f"AND material == '{material}'"
                        f"AND picture == '{picture}'")
-    cursor.execute(f"INSERT INTO Customers (nickname) VALUES ('{nickname}')")
+    cursor.execute(f"INSERT INTO Customers (nickname, user_id) VALUES ('{nickname}', {user_id})")
     connection.commit()
     cursor.execute(f"SELECT Common_Balls.id, Customers.id from Common_Balls, Customers "
                    f"where Common_Balls.type = '{type}'"
@@ -229,7 +229,7 @@ def complete_common_order(type: str, material: str, color: str, picture: str,  a
     connection.close()
 
 
-def complete_shaped_order(type: str, subtype: str, picture_name: str, amount: int, curr_amount: int, nickname: str, note: str):
+def complete_shaped_order(type: str, subtype: str, picture_name: str, amount: int, curr_amount: int, nickname: str, note: str, user_id: int):
     connection = sqlite3.Connection(os.path.join('db', 'balls_seller.sqlite'))
     cursor = connection.cursor()
     if amount == curr_amount:
@@ -243,7 +243,7 @@ def complete_shaped_order(type: str, subtype: str, picture_name: str, amount: in
                        f"AND subtype == '{subtype}'"
                        f"AND picture == '{picture_name}'")
         connection.commit()
-    cursor.execute(f"INSERT INTO Customers (nickname) VALUES ('{nickname}')")
+    cursor.execute(f"INSERT INTO Customers (nickname, user_id) VALUES ('{nickname}', {user_id})")
     connection.commit()
     cursor.execute(f"SELECT Shaped_Balls.id, Customers.id from Shaped_Balls, Customers "
                    f"where Shaped_Balls.type = '{type}'"
@@ -268,10 +268,10 @@ def complete_shaped_order(type: str, subtype: str, picture_name: str, amount: in
     connection.close()
 
 
-def complete_blowing_order(amount: int, nickname: str, note: str):
+def complete_blowing_order(amount: int, nickname: str, note: str, user_id: int):
     connection = sqlite3.Connection(os.path.join('db', 'balls_seller.sqlite'))
     cursor = connection.cursor()
-    cursor.execute(f"INSERT INTO Customers (nickname) VALUES ('{nickname}')")
+    cursor.execute(f"INSERT INTO Customers (nickname, user_id) VALUES ('{nickname}', {user_id})")
     connection.commit()
     cursor.execute(f"SELECT id from Customers WHERE nickname = '{nickname}'")
     id_customer = cursor.fetchone()[0]

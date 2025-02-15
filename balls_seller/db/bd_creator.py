@@ -66,13 +66,14 @@ cursor.execute("""
 CREATE TABLE IF NOT EXISTS "Customers" (
 	"id"	INTEGER NOT NULL UNIQUE,
 	"nickname"	TEXT NOT NULL,
+	"user_id"  INTEGER NOT NULL,
 	PRIMARY KEY("id")
 	UNIQUE("nickname") ON CONFLICT IGNORE
 )""")
 
-cursor.execute("""INSERT INTO Customers (nickname) VALUES ('@andy')""")
-cursor.execute("""INSERT INTO Customers (nickname) VALUES ('@andy')""")
-cursor.execute("""INSERT INTO Customers (nickname) VALUES ('@mike')""")
+cursor.execute("""INSERT INTO Customers (nickname, user_id) VALUES ('@andy', 11111)""")
+cursor.execute("""INSERT INTO Customers (nickname, user_id) VALUES ('@andy', 22222)""")
+cursor.execute("""INSERT INTO Customers (nickname, user_id) VALUES ('@mike', 33333)""")
 
 
 cursor.execute("""DROP TABLE Orders""")

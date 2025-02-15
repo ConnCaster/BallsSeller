@@ -438,7 +438,8 @@ async def notes_registrar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         curr_amount = get_amount_of_common_balls(type, material, color, picture)
         nickname = update.effective_user.name
         note = update.message.text
-        complete_common_order(type, material, color, picture, amount, curr_amount, nickname, note)
+        user_id = update.effective_user.id
+        complete_common_order(type, material, color, picture, amount, curr_amount, nickname, note, user_id)
 
     elif 'shape' in context.user_data.keys() and context.user_data['shape'] == 'shaped':
         if 'type' not in context.user_data.keys() \
@@ -453,14 +454,16 @@ async def notes_registrar(update: Update, context: ContextTypes.DEFAULT_TYPE):
         curr_amount = get_amount_of_shaped_balls(type, subtype, picture_name)
         nickname = update.effective_user.name
         note = update.message.text
-        complete_shaped_order(type, subtype, picture_name, amount, curr_amount, nickname, note)
+        user_id = update.effective_user.id
+        complete_shaped_order(type, subtype, picture_name, amount, curr_amount, nickname, note, user_id)
     elif 'order_type' in context.user_data.keys() and context.user_data['order_type'] == 'own_balls':
         if 'amount' not in context.user_data.keys():
             return
         amount = context.user_data['amount']
         nickname = update.effective_user.name
         note = update.message.text
-        complete_blowing_order(amount, nickname, note)
+        user_id = update.effective_user.id
+        complete_blowing_order(amount, nickname, note, user_id)
     if context.user_data:
         await update.effective_message.reply_text(f"Ваш адрес успешно принят. Вы заказали доставку {context.user_data['amount']} шариков",
                                               reply_markup=InlineKeyboardMarkup(keyboard_dict['start']['keyboard']))
